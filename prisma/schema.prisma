@@ -1,0 +1,89 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model User {
+    id      String  @id @default(uuid())
+    clerkId String  @unique
+    email   String?
+    role    Role    @default(VIEWER)
+
+    transactionId String?
+    transaction   Transaction? @relation(fields: [transactionId], references: [id])
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+enum Role {
+    ADMIN
+    STAFF
+    VIEWER
+}
+
+model Product {
+    id       String @id @default(uuid())
+    name     String
+    sku      String @unique
+    quantity Int    @default(0)
+    price    Int    @default(0)
+
+    supplierId String?
+    supllier   Supplier? @relation(fields: [supplierId], references: [id])
+
+    categoryId String?
+    category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+    transaction Transaction[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model Category {
+    id   String @id @default(uuid())
+    name String @unique
+
+    Product Product[]
+
+    createAt DateTime @default(now())
+    updateAt DateTime @updatedAt
+}
+
+model Supplier {
+    id      String  @id @default(uuid())
+    name    String
+    contact String?
+    address String?
+
+    products Product[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model Transaction {
+    id       String         @id @default(uuid())
+    type     TypeTansaction
+    quantity Int            @default(0)
+    note     String?
+
+    products Product[]
+    user     User[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+enum TypeTansaction {
+    IN
+    OUT
+}
