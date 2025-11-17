@@ -1,13 +1,10 @@
 import { useFormContext } from "react-hook-form";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
@@ -30,9 +27,15 @@ const ProductCreateForm = (props: ProductCreateFormProps) => {
 
   const {
     data: categories,
+    isLoading: isLoadingCategory,
+    isError: isErrorCategory,
+  } = api.category.getAllCategory.useQuery();
+
+  const {
+    data: suppliers,
     isLoading,
     isError,
-  } = api.category.getAllCategory.useQuery();
+  } = api.supplier.getAllSupplier.useQuery();
 
   return (
     <form className="space-y-2" onSubmit={form.handleSubmit(props.onSubmit)}>
@@ -92,12 +95,12 @@ const ProductCreateForm = (props: ProductCreateFormProps) => {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {isLoading && (
+                  {isLoadingCategory && (
                     <SelectItem value="loading" disabled>
                       Loading...
                     </SelectItem>
                   )}
-                  {isError && (
+                  {isErrorCategory && (
                     <SelectItem value="error" disabled>
                       Failed get category
                     </SelectItem>
@@ -118,20 +121,44 @@ const ProductCreateForm = (props: ProductCreateFormProps) => {
           )}
         />
         <div className="space-y-2">
-          <Label>Supplier</Label>
-          <Select>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select supplier" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectLabel>Supplier</SelectLabel>
-                <SelectItem value="blueberry">Blueberry</SelectItem>
-                <SelectItem value="grapes">Grapes</SelectItem>
-                <SelectItem value="pineapple">Pineapple</SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+          <FormField
+            control={form.control}
+            name="supplierId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Supplier</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select Supplier" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {isLoading && (
+                      <SelectItem value="loading" disabled>
+                        loading...
+                      </SelectItem>
+                    )}
+                    {isError && (
+                      <SelectItem value="error" disabled>
+                        Failed get Supplier
+                      </SelectItem>
+                    )}
+                    {suppliers && (
+                      <>
+                        {suppliers?.map((supplier) => (
+                          <SelectItem key={supplier.id} value={supplier.id}>
+                            {supplier.name}
+                          </SelectItem>
+                        ))}
+                      </>
+                    )}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
       </div>
 

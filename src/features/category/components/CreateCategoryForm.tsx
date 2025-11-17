@@ -26,7 +26,7 @@ const CreateCategoryForm = (props: CreateCategoryFormProps) => {
           <FormItem>
             <FormLabel>Category Name</FormLabel>
             <FormControl>
-              <Input placeholder="shadcn" {...field} />
+              <Input {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>

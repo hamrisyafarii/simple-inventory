@@ -116,6 +116,7 @@ const ProductPage: NextPageWithLayout = () => {
       price: values.price,
       quantity: values.quantity,
       categoryId: values.categoryId,
+      supplierId: values.supplierId,
     });
   };
 
@@ -131,6 +132,7 @@ const ProductPage: NextPageWithLayout = () => {
       categoryId: product.data.categoryId,
       price: product.data.price,
       quantity: product.data.quantity,
+      supplierId: product.data.supplierId,
     });
   };
 
@@ -148,6 +150,7 @@ const ProductPage: NextPageWithLayout = () => {
       price: values.price,
       quantity: values.quantity,
       categoryId: values.categoryId,
+      supplierId: values.supplierId,
     });
   };
 
@@ -244,7 +247,7 @@ const ProductPage: NextPageWithLayout = () => {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-muted-foreground">
-                      Supplier
+                      {product.supllier?.name}
                     </TableCell>
                     <TableCell className="text-center font-mono">
                       {product.quantity}
@@ -265,6 +268,7 @@ const ProductPage: NextPageWithLayout = () => {
                                 price: product.price,
                                 quantity: product.quantity,
                                 categoryId: product.categoryId ?? "",
+                                supplierId: product.supplierId ?? "",
                               },
                             })
                           }
