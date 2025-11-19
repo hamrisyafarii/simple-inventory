@@ -13,8 +13,8 @@
 
 ==================== Transaction task ====================
 [X] Create Transaction
-[ ] Update Transaction
-[ ] Delete Transaction
+[X] Update Transaction
+[X] Delete Transaction
 [X] Get all Transaction
 
 ==================== Search and Pagination ====================

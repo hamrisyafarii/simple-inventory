@@ -151,9 +151,7 @@ export const transactionRouter = createTRPCRouter({
           data: {
             type: typeTransaction,
             products: {
-              connect: {
-                id: productId,
-              },
+              set: [{ id: productId }],
             },
             quantity,
             note,
