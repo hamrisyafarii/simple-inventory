@@ -1,5 +1,4 @@
-import { useFormContext } from "react-hook-form";
-import { Button } from "~/components/ui/button";
+import React from "react";
 import {
   FormControl,
   FormField,
@@ -7,8 +6,6 @@ import {
   FormLabel,
   FormMessage,
 } from "~/components/ui/form";
-import { Input } from "~/components/ui/input";
-import { Textarea } from "~/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -16,10 +13,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { api } from "~/utils/api";
 import type { TransactionDataSchema } from "../forms/transaction.schema";
+import { useFormContext } from "react-hook-form";
+import { Input } from "~/components/ui/input";
+import { Textarea } from "~/components/ui/textarea";
+import { Button } from "~/components/ui/button";
+import { api } from "~/utils/api";
 
-type CreateTransactionFormProps = {
+type UpdateTransactionFormProps = {
   onSubmit: (values: TransactionDataSchema) => void;
 };
 
@@ -28,7 +29,7 @@ const TRANSACTION_TYPES = {
   OUT: "OUT",
 } as const;
 
-const CreateTransactionForm = (props: CreateTransactionFormProps) => {
+const UpdateTransactionForm = (props: UpdateTransactionFormProps) => {
   const form = useFormContext<TransactionDataSchema>();
 
   // ================= API CALL =================
@@ -36,7 +37,6 @@ const CreateTransactionForm = (props: CreateTransactionFormProps) => {
 
   return (
     <form className="space-y-4" onSubmit={form.handleSubmit(props.onSubmit)}>
-      {/* Transaction Type Field */}
       <FormField
         control={form.control}
         name="typeTransaction"
@@ -129,10 +129,10 @@ const CreateTransactionForm = (props: CreateTransactionFormProps) => {
       />
 
       <Button type="submit" className="w-full">
-        Record Transaction
+        Update Record Transaction
       </Button>
     </form>
   );
 };
 
-export default CreateTransactionForm;
+export default UpdateTransactionForm;

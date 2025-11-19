@@ -12,7 +12,7 @@
 [X] Update data supplier
 
 ==================== Transaction task ====================
-[ ] Create Transaction
+[X] Create Transaction
 [ ] Update Transaction
 [ ] Delete Transaction
 [X] Get all Transaction

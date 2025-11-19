@@ -10,6 +10,7 @@ export const productRouter = createTRPCRouter({
         quantity: z.number(),
         price: z.number(),
         categoryId: z.string().optional(),
+        supplierId: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -84,6 +85,12 @@ export const productRouter = createTRPCRouter({
             name: true,
           },
         },
+        supllier: {
+          select: {
+            name: true,
+          },
+        },
+        supplierId: true,
         categoryId: true,
       },
       orderBy: {
@@ -123,6 +130,8 @@ export const productRouter = createTRPCRouter({
           category: true,
           quantity: true,
           sku: true,
+          supplierId: true,
+          supllier: true,
         },
       });
 
@@ -137,11 +146,13 @@ export const productRouter = createTRPCRouter({
         price: z.number(),
         quantity: z.number(),
         categoryId: z.string().optional(),
+        supplierId: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       const { db } = ctx;
-      const { name, price, productId, quantity, categoryId } = input;
+      const { name, price, productId, quantity, categoryId, supplierId } =
+        input;
 
       if (!productId) {
         throw new TRPCError({
@@ -159,6 +170,7 @@ export const productRouter = createTRPCRouter({
           price,
           quantity,
           categoryId,
+          supplierId,
         },
       });
 
