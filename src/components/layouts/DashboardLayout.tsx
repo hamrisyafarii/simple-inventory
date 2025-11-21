@@ -3,7 +3,7 @@ import {
   Boxes,
   ChartBarStacked,
   Grid3X3,
-  LogOutIcon,
+  LogOut,
   Package,
   Truck,
 } from "lucide-react";
@@ -19,21 +19,31 @@ import {
   SidebarMenuItem,
   SidebarProvider,
   SidebarSeparator,
+  SidebarInset,
 } from "~/components/ui/sidebar";
 import { useRouter } from "next/router";
 import Link from "next/link";
-import { Button } from "../ui/button";
 import { useClerk, useUser } from "@clerk/nextjs";
 import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
+  AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "../ui/alert-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
 // Dashboard header component
 interface DashboardHeaderProps {
@@ -92,121 +102,164 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     await signOut();
   };
 
+  const menuItems = [
+    {
+      title: "Dashboard",
+      icon: Grid3X3,
+      href: "/dashboard",
+    },
+    {
+      title: "Products",
+      icon: Boxes,
+      href: "/products",
+    },
+    {
+      title: "Categories",
+      icon: ChartBarStacked,
+      href: "/category",
+    },
+    {
+      title: "Suppliers",
+      icon: Truck,
+      href: "/supplier",
+    },
+    {
+      title: "Transactions",
+      icon: ArrowLeftRight,
+      href: "/transaction",
+    },
+  ];
+
   return (
     <SidebarProvider defaultOpen={true}>
-      <div className="flex h-screen w-full">
-        <Sidebar>
-          <SidebarHeader className="p-4">
-            <h2 className="text-primary text-xl font-bold">
-              {" "}
-              <Package /> StockFlow
-            </h2>
-          </SidebarHeader>
-          <SidebarContent className="px-2">
-            <SidebarSeparator className="my-2" />
-
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  tooltip="Dashboard"
-                  isActive={router.pathname.includes("/dashboard")}
-                >
-                  <Link href="/dashboard">
-                    <Grid3X3 className="mr-2 h-4 w-4" />
-                    Dashboard
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  tooltip="Products"
-                  isActive={router.pathname.includes("/products")}
-                >
-                  <Link href="/products">
-                    <Boxes className="mr-2 h-4 w-4" />
-                    Products
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  tooltip="Category Management"
-                  isActive={router.pathname.includes("/category")}
-                >
-                  <Link href="/category">
-                    <ChartBarStacked className="mr-2 h-4 w-4" />
-                    Categories
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  tooltip="Supplier"
-                  isActive={router.pathname.includes("/supplier")}
-                >
-                  <Link href="/supplier">
-                    <Truck className="mr-2 h-4 w-4" />
-                    Supplier
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  tooltip="Sales Dashboard"
-                  isActive={router.pathname.includes("/transaction")}
-                >
-                  <Link href="/transaction">
-                    <ArrowLeftRight className="mr-2 h-4 w-4" />
-                    Transaction
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarContent>
-          <SidebarFooter className="p-4">
-            <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{user?.username}</span>
-                <span className="text-muted-foreground truncate text-xs">
-                  {user?.emailAddresses[0]?.emailAddress}
-                </span>
-              </div>
-
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button size={"icon"} variant={"destructive"}>
-                    <LogOutIcon className="size-4" />
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Kamu yakin mau keluar?</AlertDialogTitle>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={handleSignOut}
-                      className="bg-destructive"
-                    >
-                      Continue
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+      <Sidebar className="bg-sidebar border-r">
+        <SidebarHeader className="bg-sidebar-primary/10 p-4">
+          <Link href="/dashboard" className="flex items-center gap-2">
+            <div className="bg-primary text-primary-foreground flex h-8 w-8 items-center justify-center rounded-lg">
+              <Package className="h-5 w-5" />
             </div>
-          </SidebarFooter>
-        </Sidebar>
+            <span className="text-xl font-bold">StockFlow</span>
+          </Link>
+        </SidebarHeader>
 
-        <main className="relative flex-1 overflow-auto p-6">{children}</main>
-      </div>
+        <SidebarContent className="px-3 py-2">
+          <SidebarMenu>
+            {menuItems.map((item) => (
+              <SidebarMenuItem key={item.href}>
+                <SidebarMenuButton
+                  asChild
+                  tooltip={item.title}
+                  isActive={
+                    router.pathname === item.href ||
+                    router.pathname.startsWith(`${item.href}/`)
+                  }
+                  className="h-10"
+                >
+                  <Link href={item.href}>
+                    <item.icon className="h-5 w-5" />
+                    <span>{item.title}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
+
+          <SidebarSeparator className="my-3" />
+        </SidebarContent>
+
+        <SidebarFooter className="p-3">
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <SidebarMenuButton className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground h-10">
+                    <Avatar className="h-6 w-6">
+                      <AvatarImage
+                        src={user?.imageUrl}
+                        alt={user?.username ?? "User"}
+                      />
+                      <AvatarFallback>
+                        {user?.username?.charAt(0).toUpperCase() ?? "U"}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="grid flex-1 text-left text-sm leading-tight">
+                      <span className="truncate font-medium">
+                        {user?.username ?? "User"}
+                      </span>
+                      <span className="text-muted-foreground truncate text-xs">
+                        {user?.emailAddresses[0]?.emailAddress ??
+                          "user@example.com"}
+                      </span>
+                    </div>
+                  </SidebarMenuButton>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  className="w-56 rounded-lg"
+                  side="bottom"
+                  align="end"
+                  sideOffset={4}
+                >
+                  <DropdownMenuLabel className="p-2 font-normal">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm leading-none font-medium">
+                        {user?.username ?? "User"}
+                      </p>
+                      <p className="text-muted-foreground text-xs leading-none">
+                        {user?.emailAddresses[0]?.emailAddress ??
+                          "user@example.com"}
+                      </p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {/* <DropdownMenuItem asChild>
+                    <Link href="/profile">
+                      <User className="mr-2 h-4 w-4" />
+                      <span>Profile</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator /> */}
+                  <DropdownMenuItem
+                    className="text-red-600"
+                    onSelect={(e) => e.preventDefault()}
+                  >
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <button className="flex w-full items-center">
+                          <LogOut className="mr-2 h-4 w-4" />
+                          <span>Log out</span>
+                        </button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>
+                            Are you sure you want to log out?
+                          </AlertDialogTitle>
+                          <AlertDialogDescription>
+                            You will be redirected to the login page.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={handleSignOut}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          >
+                            Log out
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarFooter>
+      </Sidebar>
+
+      <SidebarInset className="flex flex-1 flex-col">
+        <main className="flex-1 overflow-auto p-6">{children}</main>
+      </SidebarInset>
     </SidebarProvider>
   );
 };

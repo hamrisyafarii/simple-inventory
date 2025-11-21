@@ -75,6 +75,13 @@ export const categoryRouter = createTRPCRouter({
         });
       }
 
+      if (!name) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Name category is required",
+        });
+      }
+
       const updateCategory = await db.category.update({
         where: {
           id: categoryId,

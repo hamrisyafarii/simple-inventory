@@ -22,10 +22,10 @@
 [ ] Pagination data product
 [ ] Pagination data category
 [ ] Pagination data Supplier
-[ ] Search product by name, category, SKU
-[ ] Search transaction by name, category, SKU
-[ ] Search supplier by name, category, SKU
-[ ] Search category by name, category, SKU
+[X] Search product by name, category, SKU
+[X] Search transaction by name, category, SKU
+[X] Search supplier by name, category, SKU
+[X] Search category by name, category, SKU
 
 ============== minor name =====================
 [ ] supplier name in prisma schema

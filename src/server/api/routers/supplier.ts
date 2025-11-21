@@ -66,7 +66,7 @@ export const supplierRouter = createTRPCRouter({
       if (!name) {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "Name must be required",
+          message: "Name supplier is required",
         });
       }
 

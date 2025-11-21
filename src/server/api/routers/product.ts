@@ -161,6 +161,13 @@ export const productRouter = createTRPCRouter({
         });
       }
 
+      if (!name || !price || !quantity) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: `Product name, quantity or price is required`,
+        });
+      }
+
       const updatedProduct = await db.product.update({
         where: {
           id: productId,
