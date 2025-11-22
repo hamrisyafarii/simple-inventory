@@ -146,6 +146,10 @@ const ProductPage: NextPageWithLayout = () => {
     },
   });
 
+  const { data: user } = api.user.getUserData.useQuery();
+
+  console.log("Data user", user);
+
   // =================== Filtering and Sorting Logic ===================
   const filteredProducts = useMemo(() => {
     if (!products) return [];
@@ -161,7 +165,7 @@ const ProductPage: NextPageWithLayout = () => {
             product.category?.name
               .toLowerCase()
               .includes(searchQuery.toLowerCase())) ??
-          product.supllier?.name
+          product.supplier?.name
             .toLowerCase()
             .includes(searchQuery.toLowerCase()),
       );
@@ -215,8 +219,8 @@ const ProductPage: NextPageWithLayout = () => {
           bValue = b.category?.name;
           break;
         case "supplier":
-          aValue = a.supllier?.name;
-          bValue = b.supllier?.name;
+          aValue = a.supplier?.name;
+          bValue = b.supplier?.name;
           break;
         default:
           aValue = a.name;
@@ -374,31 +378,34 @@ const ProductPage: NextPageWithLayout = () => {
       {/* =================== Header =================== */}
       <DashboardHeader>
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <>
+          <div className="flex flex-col">
             <DashboardTitle>Product Management</DashboardTitle>
             <DashboardDescription>
               Manage your product inventory, track stock levels, and update
               product information
             </DashboardDescription>
-          </>
-          <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="shadow-sm">
-                <Plus className="mr-2 h-4 w-4" />
-                Add Product
-              </Button>
-            </DialogTrigger>
+          </div>
 
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle>Create New Product</DialogTitle>
-              </DialogHeader>
+          {user?.role === "ADMIN" || user?.role === "STAFF" ? (
+            <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="shadow-sm">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Product
+                </Button>
+              </DialogTrigger>
 
-              <Form {...createProductForm}>
-                <ProductCreateForm onSubmit={handleCreateProduct} />
-              </Form>
-            </DialogContent>
-          </Dialog>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Create New Product</DialogTitle>
+                </DialogHeader>
+
+                <Form {...createProductForm}>
+                  <ProductCreateForm onSubmit={handleCreateProduct} />
+                </Form>
+              </DialogContent>
+            </Dialog>
+          ) : null}
         </div>
         <Separator className="my-4" />
       </DashboardHeader>
@@ -564,7 +571,9 @@ const ProductPage: NextPageWithLayout = () => {
                   <TableHead className="text-center font-semibold">
                     Price
                   </TableHead>
-                  <TableHead className="text-center">Actions</TableHead>
+                  {user?.role === "ADMIN" || user?.role === "STAFF" ? (
+                    <TableHead className="text-center">Actions</TableHead>
+                  ) : null}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -588,7 +597,7 @@ const ProductPage: NextPageWithLayout = () => {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-muted-foreground">
-                        {product.supllier?.name}
+                        {product.supplier?.name}
                       </TableCell>
                       <TableCell className="text-center">
                         {getStockStatusBadge(product.quantity)}
@@ -599,35 +608,39 @@ const ProductPage: NextPageWithLayout = () => {
                       <TableCell className="text-center font-mono">
                         {toRupiah(product.price)}
                       </TableCell>
-                      <TableCell className="text-center">
-                        <div className="flex items-center justify-center gap-2">
-                          <Button
-                            size={"sm"}
-                            variant={"ghost"}
-                            onClick={() =>
-                              handleClickEditProduct({
-                                id: product.id,
-                                data: {
-                                  name: product.name,
-                                  price: product.price,
-                                  quantity: product.quantity,
-                                  categoryId: product.categoryId ?? "",
-                                  supplierId: product.supplierId ?? "",
-                                },
-                              })
-                            }
-                          >
-                            <EditIcon className="text-primary h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant={"ghost"}
-                            size={"sm"}
-                            onClick={() => handleClickDeleteProduct(product.id)}
-                          >
-                            <TrashIcon className="text-destructive h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
+                      {user?.role === "STAFF" || user?.role === "ADMIN" ? (
+                        <TableCell className="text-center">
+                          <div className="flex items-center justify-center gap-2">
+                            <Button
+                              size={"sm"}
+                              variant={"ghost"}
+                              onClick={() =>
+                                handleClickEditProduct({
+                                  id: product.id,
+                                  data: {
+                                    name: product.name,
+                                    price: product.price,
+                                    quantity: product.quantity,
+                                    categoryId: product.categoryId ?? "",
+                                    supplierId: product.supplierId ?? "",
+                                  },
+                                })
+                              }
+                            >
+                              <EditIcon className="text-primary h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant={"ghost"}
+                              size={"sm"}
+                              onClick={() =>
+                                handleClickDeleteProduct(product.id)
+                              }
+                            >
+                              <TrashIcon className="text-destructive h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      ) : null}
                     </TableRow>
                   );
                 })}

@@ -38,10 +38,10 @@ export const categoryRouter = createTRPCRouter({
       select: {
         id: true,
         name: true,
-        createAt: true,
+        createdAt: true,
       },
       orderBy: {
-        createAt: "desc",
+        createdAt: "desc",
       },
     });
   }),

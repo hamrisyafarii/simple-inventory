@@ -95,6 +95,8 @@ const TransactionPage: NextPageWithLayout = () => {
   const { data: transactions, isLoading } =
     api.transaction.getAllTransaction.useQuery();
 
+  const { data: user } = api.user.getUserData.useQuery();
+
   const { mutate: createTransactionMutation } =
     api.transaction.createTransaction.useMutation({
       onSuccess: async () => {
@@ -312,13 +314,15 @@ const TransactionPage: NextPageWithLayout = () => {
               Track all inventory movements and stock changes
             </DashboardDescription>
           </div>
-          <Button
-            onClick={() => setCreateTransactionDialogOpen(true)}
-            className="shadow-sm"
-          >
-            <PlusSquare className="mr-2 h-4 w-4" />
-            Record Transaction
-          </Button>
+          {user?.role === "ADMIN" || user?.role === "STAFF" ? (
+            <Button
+              onClick={() => setCreateTransactionDialogOpen(true)}
+              className="shadow-sm"
+            >
+              <PlusSquare className="mr-2 h-4 w-4" />
+              Record Transaction
+            </Button>
+          ) : null}
         </div>
         <Separator className="my-4" />
       </DashboardHeader>
@@ -467,7 +471,9 @@ const TransactionPage: NextPageWithLayout = () => {
                   <TableHead className="font-semibold">User</TableHead>
                   <TableHead className="font-semibold">Date</TableHead>
                   <TableHead className="font-semibold">Note</TableHead>
-                  <TableHead className="text-center">Actions</TableHead>
+                  {user?.role === "ADMIN" || user?.role === "STAFF" ? (
+                    <TableHead className="text-center">Actions</TableHead>
+                  ) : null}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -504,36 +510,38 @@ const TransactionPage: NextPageWithLayout = () => {
                       <TableCell className="max-w-xs truncate">
                         {trans.note ?? "-"}
                       </TableCell>
-                      <TableCell className="text-center">
-                        <div className="flex items-center justify-center gap-2">
-                          <Button
-                            size={"sm"}
-                            variant={"ghost"}
-                            onClick={() =>
-                              handleClickUpdateTransaction({
-                                id: trans.id,
-                                data: {
-                                  productId: trans.products[0]!.id,
-                                  quantity: trans.quantity,
-                                  typeTransaction: trans.type,
-                                  note: trans.note ?? "",
-                                },
-                              })
-                            }
-                          >
-                            <EditIcon className="text-primary h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant={"ghost"}
-                            size={"sm"}
-                            onClick={() =>
-                              handleClickDeleteTransaction(trans.id)
-                            }
-                          >
-                            <TrashIcon className="text-destructive h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
+                      {user?.role === "ADMIN" || user?.role === "STAFF" ? (
+                        <TableCell className="text-center">
+                          <div className="flex items-center justify-center gap-2">
+                            <Button
+                              size={"sm"}
+                              variant={"ghost"}
+                              onClick={() =>
+                                handleClickUpdateTransaction({
+                                  id: trans.id,
+                                  data: {
+                                    productId: trans.products[0]!.id,
+                                    quantity: trans.quantity,
+                                    typeTransaction: trans.type,
+                                    note: trans.note ?? "",
+                                  },
+                                })
+                              }
+                            >
+                              <EditIcon className="text-primary h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant={"ghost"}
+                              size={"sm"}
+                              onClick={() =>
+                                handleClickDeleteTransaction(trans.id)
+                              }
+                            >
+                              <TrashIcon className="text-destructive h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      ) : null}
                     </TableRow>
                   );
                 })}

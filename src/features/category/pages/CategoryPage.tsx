@@ -86,6 +86,8 @@ const CategoryPage: NextPageWithLayout = () => {
   });
 
   // =============== API CALL ===============
+  const { data: user } = api.user.getUserData.useQuery();
+
   const { mutate: createCategory } = api.category.createCategory.useMutation({
     onSuccess: async () => {
       await apiUtils.category.getAllCategory.invalidate();
@@ -159,8 +161,8 @@ const CategoryPage: NextPageWithLayout = () => {
           bValue = b.name;
           break;
         case "date":
-          aValue = a.createAt;
-          bValue = b.createAt;
+          aValue = a.createdAt;
+          bValue = b.createdAt;
           break;
         default:
           aValue = a.name;
@@ -251,13 +253,15 @@ const CategoryPage: NextPageWithLayout = () => {
               Organize your products by creating and managing categories
             </DashboardDescription>
           </div>
-          <Button
-            onClick={() => setCategoryCreateDialog(true)}
-            className="shadow-sm"
-          >
-            <PlusSquare className="mr-2 h-4 w-4" />
-            Add Category
-          </Button>
+          {user?.role === "ADMIN" || user?.role === "STAFF" ? (
+            <Button
+              onClick={() => setCategoryCreateDialog(true)}
+              className="shadow-sm"
+            >
+              <PlusSquare className="mr-2 h-4 w-4" />
+              Add Category
+            </Button>
+          ) : null}
         </div>
         <Separator className="my-4" />
       </DashboardHeader>
@@ -405,7 +409,9 @@ const CategoryPage: NextPageWithLayout = () => {
                   <TableHead className="font-semibold">Category</TableHead>
                   <TableHead className="font-semibold">Products</TableHead>
                   <TableHead className="font-semibold">Created At</TableHead>
-                  <TableHead className="text-center">Actions</TableHead>
+                  {user?.role === "ADMIN" || user?.role === "STAFF" ? (
+                    <TableHead className="text-center">Actions</TableHead>
+                  ) : null}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -429,30 +435,32 @@ const CategoryPage: NextPageWithLayout = () => {
                           {productCount} products
                         </Badge>
                       </TableCell>
-                      <TableCell>{formatDate(cat.createAt)}</TableCell>
-                      <TableCell className="text-center">
-                        <div className="flex items-center justify-center gap-2">
-                          <Button
-                            size={"sm"}
-                            variant={"ghost"}
-                            onClick={() =>
-                              handleClickEditCategory({
-                                id: cat.id,
-                                name: cat.name,
-                              })
-                            }
-                          >
-                            <EditIcon className="text-primary h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant={"ghost"}
-                            size={"sm"}
-                            onClick={() => handleClickDeleteCategory(cat.id)}
-                          >
-                            <TrashIcon className="text-destructive h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
+                      <TableCell>{formatDate(cat.createdAt)}</TableCell>
+                      {user?.role === "ADMIN" || user?.role === "STAFF" ? (
+                        <TableCell className="text-center">
+                          <div className="flex items-center justify-center gap-2">
+                            <Button
+                              size={"sm"}
+                              variant={"ghost"}
+                              onClick={() =>
+                                handleClickEditCategory({
+                                  id: cat.id,
+                                  name: cat.name,
+                                })
+                              }
+                            >
+                              <EditIcon className="text-primary h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant={"ghost"}
+                              size={"sm"}
+                              onClick={() => handleClickDeleteCategory(cat.id)}
+                            >
+                              <TrashIcon className="text-destructive h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      ) : null}
                     </TableRow>
                   );
                 })}

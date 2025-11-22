@@ -26,7 +26,3 @@
 [X] Search transaction by name, category, SKU
 [X] Search supplier by name, category, SKU
 [X] Search category by name, category, SKU
-
-============== minor name =====================
-[ ] supplier name in prisma schema
-[ ] Date time name in category prisma schema

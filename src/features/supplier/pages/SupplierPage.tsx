@@ -89,6 +89,8 @@ const SupplierPage: NextPageWithLayout = () => {
   });
 
   // ==================== API CALLS ====================
+  const { data: user } = api.user.getUserData.useQuery();
+
   const { mutate: createNewSupplier } = api.supplier.createSupplier.useMutation(
     {
       onSuccess: async () => {
@@ -272,13 +274,15 @@ const SupplierPage: NextPageWithLayout = () => {
               Manage your supplier network and contact information
             </DashboardDescription>
           </div>
-          <Button
-            onClick={() => setCreateSupplierDialogOpen(true)}
-            className="shadow-sm"
-          >
-            <PlusSquare className="mr-2 h-4 w-4" />
-            Add Supplier
-          </Button>
+          {user?.role === "ADMIN" || user?.role === "STAFF" ? (
+            <Button
+              onClick={() => setCreateSupplierDialogOpen(true)}
+              className="shadow-sm"
+            >
+              <PlusSquare className="mr-2 h-4 w-4" />
+              Add Supplier
+            </Button>
+          ) : null}
         </div>
         <Separator className="my-4" />
       </DashboardHeader>
@@ -386,7 +390,9 @@ const SupplierPage: NextPageWithLayout = () => {
                   <TableHead className="font-semibold">Address</TableHead>
                   <TableHead className="font-semibold">Products</TableHead>
                   <TableHead className="font-semibold">Added On</TableHead>
-                  <TableHead className="text-center">Actions</TableHead>
+                  {user?.role === "ADMIN" || user?.role === "STAFF" ? (
+                    <TableHead className="text-center">Actions</TableHead>
+                  ) : null}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -433,35 +439,37 @@ const SupplierPage: NextPageWithLayout = () => {
                         </Badge>
                       </TableCell>
                       <TableCell>{formatDate(supplier.createdAt)}</TableCell>
-                      <TableCell className="text-center">
-                        <div className="flex items-center justify-center gap-2">
-                          <Button
-                            size={"sm"}
-                            variant={"ghost"}
-                            onClick={() =>
-                              handleClickUpdateSupplier({
-                                id: supplier.id,
-                                data: {
-                                  name: supplier.name,
-                                  address: supplier.address ?? "",
-                                  contact: supplier.contact ?? "",
-                                },
-                              })
-                            }
-                          >
-                            <EditIcon className="text-primary h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant={"ghost"}
-                            size={"sm"}
-                            onClick={() =>
-                              handleClickDeleteSupplier(supplier.id)
-                            }
-                          >
-                            <TrashIcon className="text-destructive h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
+                      {user?.role === "ADMIN" || user?.role === "STAFF" ? (
+                        <TableCell className="text-center">
+                          <div className="flex items-center justify-center gap-2">
+                            <Button
+                              size={"sm"}
+                              variant={"ghost"}
+                              onClick={() =>
+                                handleClickUpdateSupplier({
+                                  id: supplier.id,
+                                  data: {
+                                    name: supplier.name,
+                                    address: supplier.address ?? "",
+                                    contact: supplier.contact ?? "",
+                                  },
+                                })
+                              }
+                            >
+                              <EditIcon className="text-primary h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant={"ghost"}
+                              size={"sm"}
+                              onClick={() =>
+                                handleClickDeleteSupplier(supplier.id)
+                              }
+                            >
+                              <TrashIcon className="text-destructive h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      ) : null}
                     </TableRow>
                   );
                 })}

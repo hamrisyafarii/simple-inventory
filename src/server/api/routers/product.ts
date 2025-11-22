@@ -85,7 +85,7 @@ export const productRouter = createTRPCRouter({
             name: true,
           },
         },
-        supllier: {
+        supplier: {
           select: {
             name: true,
           },
@@ -131,7 +131,7 @@ export const productRouter = createTRPCRouter({
           quantity: true,
           sku: true,
           supplierId: true,
-          supllier: true,
+          supplier: true,
         },
       });
 

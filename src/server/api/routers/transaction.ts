@@ -1,9 +1,9 @@
 import z from "zod";
-import { createTRPCRouter, staffProcedure } from "../trpc";
+import { createTRPCRouter, staffProcedure, userProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
 
 export const transactionRouter = createTRPCRouter({
-  getAllTransaction: staffProcedure.query(async ({ ctx }) => {
+  getAllTransaction: userProcedure.query(async ({ ctx }) => {
     const { db } = ctx;
 
     return await db.transaction.findMany({
