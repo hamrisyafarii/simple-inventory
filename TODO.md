@@ -1,3 +1,17 @@
+-ACCOUNT
+{
+email: admin@example.com
+password: accountadmin123
+}
+{
+email: staff@exmaple.com  
+ password: accountStaff123
+}
+{
+email: viewer@example.com
+password: accountViewer123
+}
+
 -MAIN TASK
 [X] CRUD CATEGORY
 [X] Alert dialog delete product

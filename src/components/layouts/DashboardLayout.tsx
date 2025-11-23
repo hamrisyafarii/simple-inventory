@@ -6,6 +6,7 @@ import {
   LogOut,
   Package,
   Truck,
+  User,
 } from "lucide-react";
 import React, { type ReactNode } from "react";
 
@@ -44,6 +45,7 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { api } from "~/utils/api";
 
 // Dashboard header component
 interface DashboardHeaderProps {
@@ -98,9 +100,19 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const router = useRouter();
   const { signOut } = useClerk();
 
+  const { data: userData } = api.user.getUserData.useQuery();
+
   const handleSignOut = async () => {
     await signOut();
   };
+
+  const menutForAdmin = [
+    {
+      title: "Users",
+      icon: User,
+      href: "/users",
+    },
+  ];
 
   const menuItems = [
     {
@@ -165,6 +177,31 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           </SidebarMenu>
 
           <SidebarSeparator className="my-3" />
+
+          {menutForAdmin.map((item) => {
+            return (
+              <>
+                {userData?.role === "ADMIN" ? (
+                  <SidebarMenuItem key={item.href}>
+                    <SidebarMenuButton
+                      asChild
+                      tooltip={item.title}
+                      isActive={
+                        router.pathname === item.href ||
+                        router.pathname.startsWith(`${item.href}/`)
+                      }
+                      className="h-10"
+                    >
+                      <Link href={item.href}>
+                        <item.icon className="h-5 w-5" />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ) : null}
+              </>
+            );
+          })}
         </SidebarContent>
 
         <SidebarFooter className="p-3">
@@ -208,16 +245,19 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                         {user?.emailAddresses[0]?.emailAddress ??
                           "user@example.com"}
                       </p>
+                      <p className="text-muted-foreground leading-none">
+                        {userData?.role}
+                      </p>
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  {/* <DropdownMenuItem asChild>
+                  <DropdownMenuItem asChild>
                     <Link href="/profile">
                       <User className="mr-2 h-4 w-4" />
                       <span>Profile</span>
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuSeparator /> */}
+                  <DropdownMenuSeparator />
                   <DropdownMenuItem
                     className="text-red-600"
                     onSelect={(e) => e.preventDefault()}

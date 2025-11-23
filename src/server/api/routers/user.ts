@@ -1,3 +1,4 @@
+import z from "zod";
 import { adminProcedure, createTRPCRouter, userProcedure } from "../trpc";
 
 export const userRouter = createTRPCRouter({
@@ -15,6 +16,29 @@ export const userRouter = createTRPCRouter({
 
     return users;
   }),
+
+  updateDataUser: adminProcedure
+    .input(
+      z.object({
+        userId: z.string().uuid(),
+        role: z.enum(["ADMIN", "STAFF", "VIEWER"]),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { db } = ctx;
+      const { role, userId } = input;
+
+      const updateUser = await db.user.update({
+        where: {
+          id: userId,
+        },
+        data: {
+          role,
+        },
+      });
+
+      return updateUser;
+    }),
 
   getUserData: userProcedure.query(async ({ ctx }) => {
     const { db, session } = ctx;

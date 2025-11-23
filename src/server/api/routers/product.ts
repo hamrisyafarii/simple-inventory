@@ -15,44 +15,60 @@ export const productRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const { db } = ctx;
-      const { name, price, quantity, categoryId } = input;
+      const { name, price, quantity, categoryId, supplierId } = input;
 
-      // Generate SKU
-      const maxRetries = 3;
+      const maxRetries = 5;
 
       for (let attempt = 0; attempt < maxRetries; attempt++) {
         try {
           const newProduct = await db.$transaction(async (tx) => {
             let prefix = "GEN";
+
             if (categoryId) {
               const category = await tx.category.findUnique({
                 where: { id: categoryId },
+                select: { name: true },
               });
-              if (category) {
-                prefix = category.name.slice(0, 3).toUpperCase();
+
+              if (category?.name) {
+                prefix = category.name
+                  .replace(/\s+/g, "")
+                  .slice(0, 3)
+                  .toUpperCase();
               }
             }
 
             const lastProduct = await tx.product.findFirst({
-              where: { categoryId },
-              orderBy: { sku: "desc" },
+              where: {
+                sku: {
+                  startsWith: `${prefix}-`,
+                },
+              },
+              orderBy: {
+                createdAt: "desc",
+              },
+              select: { sku: true },
             });
 
             let nextNumber = 1;
+
             if (lastProduct?.sku) {
-              const parts = lastProduct.sku.split("-");
-              const lastNum = parseInt(parts[1]!);
-              if (!isNaN(lastNum)) nextNumber = lastNum + 1;
+              const match = /-(\d+)$/.exec(lastProduct.sku);
+
+              if (match?.[1]) {
+                nextNumber = parseInt(match[1], 10) + 1;
+              }
             }
 
             const sku = `${prefix}-${String(nextNumber).padStart(3, "0")}`;
 
             return tx.product.create({
               data: {
-                categoryId,
                 name,
                 price,
                 quantity,
+                categoryId,
+                supplierId,
                 sku,
               },
             });
@@ -61,9 +77,11 @@ export const productRouter = createTRPCRouter({
           return newProduct;
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          if (error.code === "P2002" && attempt < maxRetries - 1) {
-            continue;
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+          if (error.code === "P2002" && error.meta?.target?.includes("sku")) {
+            if (attempt < maxRetries - 1) {
+              continue;
+            }
           }
           throw error;
         }
