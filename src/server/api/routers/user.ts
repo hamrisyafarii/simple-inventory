@@ -1,8 +1,14 @@
 import z from "zod";
-import { adminProcedure, createTRPCRouter, userProcedure } from "../trpc";
+import {
+  adminProcedure,
+  createTRPCRouter,
+  staffProcedure,
+  userProcedure,
+} from "../trpc";
+import { TRPCError } from "@trpc/server";
 
 export const userRouter = createTRPCRouter({
-  getAllUsers: adminProcedure.query(async ({ ctx }) => {
+  getAllUsers: staffProcedure.query(async ({ ctx }) => {
     const { db } = ctx;
 
     const users = await db.user.findMany({
@@ -11,6 +17,9 @@ export const userRouter = createTRPCRouter({
         email: true,
         createdAt: true,
         role: true,
+      },
+      orderBy: {
+        createdAt: "desc",
       },
     });
 
@@ -27,6 +36,13 @@ export const userRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { db } = ctx;
       const { role, userId } = input;
+
+      if (!userId) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "User not found, please try again latter",
+        });
+      }
 
       const updateUser = await db.user.update({
         where: {

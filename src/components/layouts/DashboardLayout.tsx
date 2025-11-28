@@ -19,7 +19,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarProvider,
-  SidebarSeparator,
   SidebarInset,
 } from "~/components/ui/sidebar";
 import { useRouter } from "next/router";
@@ -174,34 +173,32 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                 </SidebarMenuButton>
               </SidebarMenuItem>
             ))}
+
+            {menutForAdmin.map((item) => {
+              return (
+                <>
+                  {userData?.role === "ADMIN" || userData?.role === "STAFF" ? (
+                    <SidebarMenuItem key={item.href}>
+                      <SidebarMenuButton
+                        asChild
+                        tooltip={item.title}
+                        isActive={
+                          router.pathname === item.href ||
+                          router.pathname.startsWith(`${item.href}/`)
+                        }
+                        className="h-10"
+                      >
+                        <Link href={item.href}>
+                          <item.icon className="h-5 w-5" />
+                          <span>{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ) : null}
+                </>
+              );
+            })}
           </SidebarMenu>
-
-          <SidebarSeparator className="my-3" />
-
-          {menutForAdmin.map((item) => {
-            return (
-              <>
-                {userData?.role === "ADMIN" ? (
-                  <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton
-                      asChild
-                      tooltip={item.title}
-                      isActive={
-                        router.pathname === item.href ||
-                        router.pathname.startsWith(`${item.href}/`)
-                      }
-                      className="h-10"
-                    >
-                      <Link href={item.href}>
-                        <item.icon className="h-5 w-5" />
-                        <span>{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ) : null}
-              </>
-            );
-          })}
         </SidebarContent>
 
         <SidebarFooter className="p-3">
