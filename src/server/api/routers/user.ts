@@ -6,6 +6,7 @@ import {
   userProcedure,
 } from "../trpc";
 import { TRPCError } from "@trpc/server";
+import { clerkClient } from "@clerk/nextjs/server";
 
 export const userRouter = createTRPCRouter({
   getAllUsers: staffProcedure.query(async ({ ctx }) => {
@@ -72,4 +73,50 @@ export const userRouter = createTRPCRouter({
 
     return user;
   }),
+
+  deleteUserByAdmin: adminProcedure
+    .input(
+      z.object({
+        userId: z.string().uuid(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { db } = ctx;
+      const { userId } = input;
+
+      const user = await db.user.findFirst({
+        where: {
+          id: userId,
+        },
+        select: {
+          clerkId: true,
+          email: true,
+        },
+      });
+
+      if (!user) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "User not found, please try again latter",
+        });
+      }
+
+      try {
+        const clerk = await clerkClient();
+
+        await clerk.users.deleteUser(user.clerkId);
+
+        await db.user.delete({
+          where: { id: userId },
+        });
+
+        return { success: true, email: user.email };
+      } catch (error) {
+        console.error("Error deleting user from Clerk:", error);
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to delete user from Clerk",
+        });
+      }
+    }),
 });

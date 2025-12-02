@@ -423,7 +423,7 @@ const CategoryPage: NextPageWithLayout = () => {
                       className="hover:bg-muted/50 transition-colors"
                     >
                       <TableCell className="font-medium">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 capitalize">
                           <Folder className="text-muted-foreground h-4 w-4" />
                           {cat.name}
                         </div>

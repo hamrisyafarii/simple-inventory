@@ -487,7 +487,7 @@ const TransactionPage: NextPageWithLayout = () => {
                         {getTransactionTypeBadge(trans.type)}
                       </TableCell>
                       <TableCell>
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-1 capitalize">
                           {trans.products.map((p) => p.name).join(", ")}
                         </div>
                       </TableCell>

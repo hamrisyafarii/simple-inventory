@@ -404,7 +404,7 @@ const SupplierPage: NextPageWithLayout = () => {
                       className="hover:bg-muted/50 transition-colors"
                     >
                       <TableCell className="font-medium">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 capitalize">
                           <Building className="text-muted-foreground h-4 w-4" />
                           {supplier.name}
                         </div>
@@ -421,7 +421,7 @@ const SupplierPage: NextPageWithLayout = () => {
                       </TableCell>
                       <TableCell>
                         {supplier.address ? (
-                          <div className="flex items-start gap-1">
+                          <div className="flex items-start gap-1 capitalize">
                             <MapPin className="text-muted-foreground mt-0.5 h-3 w-3" />
                             <span className="line-clamp-2">
                               {supplier.address}

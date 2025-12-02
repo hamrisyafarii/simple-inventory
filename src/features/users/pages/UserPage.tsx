@@ -88,6 +88,17 @@ const UserPage: NextPageWithLayout = () => {
     },
   });
 
+  const { mutate: deleteUser } = api.user.deleteUserByAdmin.useMutation({
+    onSuccess: async () => {
+      await apiUtils.user.getAllUsers.invalidate();
+
+      toast.success("Successfully delete data user");
+    },
+    onError: (err) => {
+      toast.error(err.shape?.message);
+    },
+  });
+
   // =================== Handling ====================
   const handleUpdateClickUser = (user: { role: Role; id: string }) => {
     setGetUserId(user.id);
@@ -104,6 +115,18 @@ const UserPage: NextPageWithLayout = () => {
     updateUser({
       userId: getUserId,
       role: value.role,
+    });
+  };
+
+  const handleClickDeleteUser = (userId: string) => {
+    setGetUserId(userId);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleActionDelete = () => {
+    if (!getUserId) return;
+    deleteUser({
+      userId: getUserId,
     });
   };
 
@@ -332,7 +355,7 @@ const UserPage: NextPageWithLayout = () => {
                           <Button
                             variant={"ghost"}
                             size={"sm"}
-                            onClick={() => setDeleteDialogOpen(true)}
+                            onClick={() => handleClickDeleteUser(user.id)}
                           >
                             <TrashIcon className="text-destructive h-4 w-4" />
                           </Button>
@@ -375,7 +398,10 @@ const UserPage: NextPageWithLayout = () => {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction className="bg-destructive">
+            <AlertDialogAction
+              className="bg-destructive"
+              onClick={handleActionDelete}
+            >
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>

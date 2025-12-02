@@ -588,7 +588,7 @@ const ProductPage: NextPageWithLayout = () => {
                           {product.sku}
                         </code>
                       </TableCell>
-                      <TableCell className="font-medium">
+                      <TableCell className="font-medium capitalize">
                         {product.name}
                       </TableCell>
                       <TableCell>
@@ -596,7 +596,7 @@ const ProductPage: NextPageWithLayout = () => {
                           {product.category?.name}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-muted-foreground">
+                      <TableCell className="text-muted-foreground capitalize">
                         {product.supplier?.name}
                       </TableCell>
                       <TableCell className="text-center">

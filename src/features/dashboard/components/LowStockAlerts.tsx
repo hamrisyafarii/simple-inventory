@@ -44,7 +44,7 @@ const LowStockAlerts = (props: LowStockAlerts) => {
               <div key={item.id} className="flex items-center justify-between">
                 <Link
                   href={`/products`}
-                  className="font-medium hover:underline"
+                  className="font-medium capitalize hover:underline"
                 >
                   {item.name}
                 </Link>

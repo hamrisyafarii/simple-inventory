@@ -201,7 +201,7 @@ const DashboardPage: NextPageWithLayout = () => {
                               {trans.type}
                             </Badge>
                           </TableCell>
-                          <TableCell className="font-medium">
+                          <TableCell className="font-medium capitalize">
                             {trans.products[0]?.name}
                           </TableCell>
                           <TableCell className="text-right">
