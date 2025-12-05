@@ -43,6 +43,8 @@ import {
   AlertCircle,
   CheckCircle,
   Clock,
+  Calendar,
+  X,
 } from "lucide-react";
 import { toRupiah } from "~/utils/toRupiah";
 import {
@@ -75,8 +77,12 @@ import {
 import ProductEditForm from "../components/ProductEditForm";
 import { Skeleton } from "~/components/ui/skeleton";
 import StatsCardProducts from "../components/StatsCardProducts";
-
-type SortableValue = string | number | undefined;
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "~/components/ui/popover";
+import { cn } from "~/lib/utils";
 
 const ProductPage: NextPageWithLayout = () => {
   const apiUtils = api.useUtils();
@@ -88,8 +94,10 @@ const ProductPage: NextPageWithLayout = () => {
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [supplierFilter, setSupplierFilter] = useState<string>("all");
   const [stockStatusFilter, setStockStatusFilter] = useState<string>("all");
-  const [sortBy, setSortBy] = useState<string>("name");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [startDate, setStartDate] = useState<Date | undefined>();
+  const [endDate, setEndDate] = useState<Date | undefined>();
+  const [monthFilter, setMonthFilter] = useState<string>("all");
+  const [yearFilter, setYearFilter] = useState<string>("all");
 
   // ========== useForm ==========
   const createProductForm = useForm<ProductDataSchema>({
@@ -140,7 +148,6 @@ const ProductPage: NextPageWithLayout = () => {
       toast.success("Successfully deleted product !");
       setDeleteProductDialogOpen(false);
     },
-
     onError: (error) => {
       toast.error(error.shape?.message);
     },
@@ -148,7 +155,40 @@ const ProductPage: NextPageWithLayout = () => {
 
   const { data: user } = api.user.getUserData.useQuery();
 
-  console.log("Data user", user);
+  const { availableYears, availableMonths } = useMemo(() => {
+    if (!products) return { availableYears: [], availableMonths: [] };
+
+    const years = new Set<number>();
+    const months = new Set<number>();
+
+    products.forEach((product) => {
+      if (product.createdAt) {
+        const date = new Date(product.createdAt);
+        years.add(date.getFullYear());
+        months.add(date.getMonth());
+      }
+    });
+
+    return {
+      availableYears: Array.from(years).sort((a, b) => b - a),
+      availableMonths: Array.from(months).sort((a, b) => a - b),
+    };
+  }, [products]);
+
+  const monthNames = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
 
   // =================== Filtering and Sorting Logic ===================
   const filteredProducts = useMemo(() => {
@@ -196,52 +236,36 @@ const ProductPage: NextPageWithLayout = () => {
       });
     }
 
-    // Sort products
-    filtered.sort((a, b) => {
-      let aValue: SortableValue;
-      let bValue: SortableValue;
+    // Filter by date range
+    if (startDate && endDate) {
+      filtered = filtered.filter((product) => {
+        if (!product.createdAt) return false;
+        const productDate = new Date(product.createdAt);
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        start.setHours(0, 0, 0, 0);
+        end.setHours(23, 59, 59, 999);
+        return productDate >= start && productDate <= end;
+      });
+    }
 
-      switch (sortBy) {
-        case "name":
-          aValue = a.name;
-          bValue = b.name;
-          break;
-        case "price":
-          aValue = a.price;
-          bValue = b.price;
-          break;
-        case "quantity":
-          aValue = a.quantity;
-          bValue = b.quantity;
-          break;
-        case "category":
-          aValue = a.category?.name;
-          bValue = b.category?.name;
-          break;
-        case "supplier":
-          aValue = a.supplier?.name;
-          bValue = b.supplier?.name;
-          break;
-        default:
-          aValue = a.name;
-          bValue = b.name;
-      }
+    // Filter by month
+    if (monthFilter !== "all") {
+      filtered = filtered.filter((product) => {
+        if (!product.createdAt) return false;
+        const productDate = new Date(product.createdAt);
+        return productDate.getMonth() === parseInt(monthFilter);
+      });
+    }
 
-      if (aValue == null) return 1;
-      if (bValue == null) return -1;
-
-      if (typeof aValue === "string" && typeof bValue === "string") {
-        return sortOrder === "asc"
-          ? aValue.localeCompare(bValue)
-          : bValue.localeCompare(aValue);
-      }
-
-      if (typeof aValue === "number" && typeof bValue === "number") {
-        return sortOrder === "asc" ? aValue - bValue : bValue - aValue;
-      }
-
-      return 0;
-    });
+    // Filter by year
+    if (yearFilter !== "all") {
+      filtered = filtered.filter((product) => {
+        if (!product.createdAt) return false;
+        const productDate = new Date(product.createdAt);
+        return productDate.getFullYear() === parseInt(yearFilter);
+      });
+    }
 
     return filtered;
   }, [
@@ -250,8 +274,10 @@ const ProductPage: NextPageWithLayout = () => {
     categoryFilter,
     supplierFilter,
     stockStatusFilter,
-    sortBy,
-    sortOrder,
+    startDate,
+    endDate,
+    monthFilter,
+    yearFilter,
   ]);
 
   // Get unique categories and suppliers for filters
@@ -342,6 +368,13 @@ const ProductPage: NextPageWithLayout = () => {
     });
   };
 
+  const handleClearDateFilters = () => {
+    setStartDate(undefined);
+    setEndDate(undefined);
+    setMonthFilter("all");
+    setYearFilter("all");
+  };
+
   const getStockStatusBadge = (quantity: number) => {
     if (quantity === 0) {
       return (
@@ -372,6 +405,9 @@ const ProductPage: NextPageWithLayout = () => {
       );
     }
   };
+
+  const hasActiveFilters =
+    startDate ?? endDate ?? (monthFilter !== "all" || yearFilter !== "all");
 
   return (
     <div className="space-y-6">
@@ -483,27 +519,180 @@ const ProductPage: NextPageWithLayout = () => {
               </Select>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-muted-foreground text-sm">Sort by:</span>
-            <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="name">Name</SelectItem>
-                <SelectItem value="price">Price</SelectItem>
-                <SelectItem value="quantity">Quantity</SelectItem>
-                <SelectItem value="category">Category</SelectItem>
-                <SelectItem value="supplier">Supplier</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
-            >
-              {sortOrder === "asc" ? "A-Z" : "Z-A"}
-            </Button>
+
+          <div className="flex flex-col gap-4 rounded-lg border p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Calendar className="text-muted-foreground h-4 w-4" />
+                <span className="text-sm font-medium">Date Filters</span>
+              </div>
+              {hasActiveFilters && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleClearDateFilters}
+                  className="h-8 text-xs"
+                >
+                  <X className="mr-1 h-3 w-3" />
+                  Clear
+                </Button>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+              <div className="space-y-2">
+                <label className="text-muted-foreground text-xs font-medium">
+                  Start Date
+                </label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !startDate && "text-muted-foreground",
+                      )}
+                    >
+                      <Calendar className="mr-2 h-4 w-4" />
+                      {startDate
+                        ? startDate.toLocaleDateString("en-US", {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          })
+                        : "Pick a date"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <input
+                      type="date"
+                      className="w-full p-3"
+                      value={
+                        startDate ? startDate.toISOString().split("T")[0] : ""
+                      }
+                      onChange={(e) => {
+                        const date = e.target.value
+                          ? new Date(e.target.value)
+                          : undefined;
+                        setStartDate(date);
+                      }}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-muted-foreground text-xs font-medium">
+                  End Date
+                </label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !endDate && "text-muted-foreground",
+                      )}
+                    >
+                      <Calendar className="mr-2 h-4 w-4" />
+                      {endDate
+                        ? endDate.toLocaleDateString("en-US", {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          })
+                        : "Pick a date"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <input
+                      type="date"
+                      className="w-full p-3"
+                      value={endDate ? endDate.toISOString().split("T")[0] : ""}
+                      onChange={(e) => {
+                        const date = e.target.value
+                          ? new Date(e.target.value)
+                          : undefined;
+                        setEndDate(date);
+                      }}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-muted-foreground text-xs font-medium">
+                  Month
+                </label>
+                <Select value={monthFilter} onValueChange={setMonthFilter}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="All Months" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Months</SelectItem>
+                    {availableMonths.map((month) => (
+                      <SelectItem key={month} value={month.toString()}>
+                        {monthNames[month]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-muted-foreground text-xs font-medium">
+                  Year
+                </label>
+                <Select value={yearFilter} onValueChange={setYearFilter}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="All Years" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Years</SelectItem>
+                    {availableYears.map((year) => (
+                      <SelectItem key={year} value={year.toString()}>
+                        {year}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {hasActiveFilters && (
+              <div className="flex flex-wrap gap-2">
+                {startDate && (
+                  <Badge variant="secondary" className="gap-1">
+                    From:{" "}
+                    {startDate.toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </Badge>
+                )}
+                {endDate && (
+                  <Badge variant="secondary" className="gap-1">
+                    To:{" "}
+                    {endDate.toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </Badge>
+                )}
+                {monthFilter !== "all" && (
+                  <Badge variant="secondary" className="gap-1">
+                    Month: {monthNames[parseInt(monthFilter)]}
+                  </Badge>
+                )}
+                {yearFilter !== "all" && (
+                  <Badge variant="secondary" className="gap-1">
+                    Year: {yearFilter}
+                  </Badge>
+                )}
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -540,14 +729,16 @@ const ProductPage: NextPageWithLayout = () => {
                 {searchQuery ||
                 categoryFilter !== "all" ||
                 supplierFilter !== "all" ||
-                stockStatusFilter !== "all"
+                stockStatusFilter !== "all" ||
+                hasActiveFilters
                   ? "Try adjusting your search or filters to find what you're looking for."
                   : "Get started by adding your first product to the inventory."}
               </p>
               {!searchQuery &&
                 categoryFilter === "all" &&
                 supplierFilter === "all" &&
-                stockStatusFilter === "all" && (
+                stockStatusFilter === "all" &&
+                !hasActiveFilters && (
                   <Button onClick={() => setCreateDialogOpen(true)}>
                     <Plus className="mr-2 h-4 w-4" />
                     Add Product

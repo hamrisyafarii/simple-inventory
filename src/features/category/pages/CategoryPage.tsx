@@ -1,12 +1,4 @@
-import {
-  EditIcon,
-  PlusSquare,
-  Search,
-  TrashIcon,
-  Folder,
-  AlertCircle,
-  CheckCircle,
-} from "lucide-react";
+import { EditIcon, PlusSquare, Search, TrashIcon, Folder } from "lucide-react";
 import { useState, type ReactElement, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import {
@@ -16,13 +8,6 @@ import {
   DashboardTitle,
 } from "~/components/layouts/DashboardLayout";
 import { Button } from "~/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "~/components/ui/dialog";
 import { Separator } from "~/components/ui/separator";
 import {
   Table,
@@ -63,6 +48,9 @@ import {
 } from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
 import { Skeleton } from "~/components/ui/skeleton";
+import StatsCardCategory from "../components/StatsCardCategory";
+import CreateCategoryDialog from "../components/CreateCategoryDialog";
+import UpdateCategoryDialog from "../components/UpdateCategoryDialog";
 
 type SortValue = string | Date | undefined;
 
@@ -267,52 +255,11 @@ const CategoryPage: NextPageWithLayout = () => {
       </DashboardHeader>
 
       {/* =================== Stats Cards =================== */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card className="shadow-sm">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Total Categories
-            </CardTitle>
-            <Folder className="text-muted-foreground h-4 w-4" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{categoryStats.total}</div>
-            <p className="text-muted-foreground text-xs">
-              All categories in inventory
-            </p>
-          </CardContent>
-        </Card>
-        <Card className="shadow-sm">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">With Products</CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">
-              {categoryStats.withProducts}
-            </div>
-            <p className="text-muted-foreground text-xs">
-              Categories containing products
-            </p>
-          </CardContent>
-        </Card>
-        <Card className="shadow-sm">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Empty Categories
-            </CardTitle>
-            <AlertCircle className="h-4 w-4 text-amber-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-amber-600">
-              {categoryStats.empty}
-            </div>
-            <p className="text-muted-foreground text-xs">
-              Categories without products
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+      <StatsCardCategory
+        empty={categoryStats.empty}
+        total={categoryStats.total}
+        withProducts={categoryStats.withProducts}
+      />
 
       {/* =================== Search and Filters =================== */}
       <Card className="shadow-sm">
@@ -471,40 +418,24 @@ const CategoryPage: NextPageWithLayout = () => {
       </Card>
 
       {/* =============== DIALOG CREATE CATEGORY =============== */}
-      <Dialog
-        open={categoryCreateDialog}
-        onOpenChange={setCategoryCreateDialog}
+      <CreateCategoryDialog
+        categoryCreateDialog={categoryCreateDialog}
+        setCategoryCreateDialog={setCategoryCreateDialog}
       >
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Create New Category</DialogTitle>
-            <DialogDescription>
-              Enter the category name below to create a new category
-            </DialogDescription>
-          </DialogHeader>
-          <Form {...categoryForm}>
-            <CreateCategoryForm onSubmit={handleCreateCategory} />
-          </Form>
-        </DialogContent>
-      </Dialog>
+        <Form {...categoryForm}>
+          <CreateCategoryForm onSubmit={handleCreateCategory} />
+        </Form>
+      </CreateCategoryDialog>
 
       {/* ================ DIALOG EDIT CATEGORY ================ */}
-      <Dialog
-        open={editCategoryDialogOpen}
-        onOpenChange={setEditCategoryDialogOpen}
+      <UpdateCategoryDialog
+        editCategoryDialogOpen={editCategoryDialogOpen}
+        setEditCategoryDialogOpen={setEditCategoryDialogOpen}
       >
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Edit Category</DialogTitle>
-            <DialogDescription>
-              Update the category name below
-            </DialogDescription>
-          </DialogHeader>
-          <Form {...editCategoryForm}>
-            <EditCategoryForm onSubmit={handleSubmitEditCategory} />
-          </Form>
-        </DialogContent>
-      </Dialog>
+        <Form {...editCategoryForm}>
+          <EditCategoryForm onSubmit={handleSubmitEditCategory} />
+        </Form>
+      </UpdateCategoryDialog>
 
       {/* ================ DIALOG DELETE CATEGORY ================ */}
       <AlertDialog

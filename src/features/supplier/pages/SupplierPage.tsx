@@ -15,13 +15,6 @@ import {
   DashboardTitle,
 } from "~/components/layouts/DashboardLayout";
 import { Button } from "~/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "~/components/ui/dialog";
 import { Form } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { Separator } from "~/components/ui/separator";
@@ -45,16 +38,6 @@ import {
 } from "~/components/ui/table";
 import SupplierUpdateForm from "../components/SupplierUpdateForm";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "~/components/ui/alert-dialog";
-import {
   Card,
   CardContent,
   CardDescription,
@@ -64,6 +47,9 @@ import {
 import { Badge } from "~/components/ui/badge";
 import { Skeleton } from "~/components/ui/skeleton";
 import StatsCardSupplier from "../components/StatsCardSupplier";
+import CreateSupplierDialog from "../components/CreateSupplierDialog";
+import UpdateSupplierDialog from "../components/UpdateSupplierDialog";
+import DeleteSupplierAlertDialog from "../components/DeleteSupplierAlertDialog";
 
 type SortValue = string | Date | undefined;
 
@@ -480,71 +466,33 @@ const SupplierPage: NextPageWithLayout = () => {
       </Card>
 
       {/* =================== CREATE SUPPLIER =================== */}
-      <Dialog
-        open={createSupplierDialogOpen}
-        onOpenChange={setCreateSupplierDialogOpen}
+      <CreateSupplierDialog
+        createSupplierDialogOpen={createSupplierDialogOpen}
+        setCreateSupplierDialogOpen={setCreateSupplierDialogOpen}
       >
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Add New Supplier</DialogTitle>
-            <DialogDescription>
-              Enter the supplier details below to create a new supplier
-            </DialogDescription>
-          </DialogHeader>
-          <Form {...createSupplierForm}>
-            <SupplierCreateForm onSubmit={handleCreateSupplier} />
-          </Form>
-        </DialogContent>
-      </Dialog>
+        <Form {...createSupplierForm}>
+          <SupplierCreateForm onSubmit={handleCreateSupplier} />
+        </Form>
+      </CreateSupplierDialog>
 
       {/* =================== UPDATE SUPPLIER =================== */}
-      <Dialog
-        open={updateSupplierDialogOpen}
-        onOpenChange={setUpdateSupplierDialogOpen}
+      <UpdateSupplierDialog
+        updateSupplierDialogOpen={updateSupplierDialogOpen}
+        setUpdateSupplierDialogOpen={setUpdateSupplierDialogOpen}
       >
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Update Supplier</DialogTitle>
-            <DialogDescription>
-              Update the supplier details below
-            </DialogDescription>
-          </DialogHeader>
-          <Form {...updateSupplierForm}>
-            <SupplierUpdateForm onSubmit={handleUpdateSupplier} />
-          </Form>
-        </DialogContent>
-      </Dialog>
+        <Form {...updateSupplierForm}>
+          <SupplierUpdateForm onSubmit={handleUpdateSupplier} />
+        </Form>
+      </UpdateSupplierDialog>
 
       {/* =================== DELETE ALERT SUPPLIER =================== */}
-      <AlertDialog
-        open={deleteSupplierDialogOpen}
-        onOpenChange={setDeleteSupplierDialogOpen}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the
-              supplier from your network.
-              {getProductCount(supplierToId ?? "") > 0 && (
-                <span className="text-destructive mt-2 block font-medium">
-                  Note: {getProductCount(supplierToId ?? "")} products are
-                  associated with this supplier.
-                </span>
-              )}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDeleteSupplier}
-              className="bg-destructive"
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <DeleteSupplierAlertDialog
+        deleteSupplierDialogOpen={deleteSupplierDialogOpen}
+        setDeleteSupplierDialogOpen={setDeleteSupplierDialogOpen}
+        handleDeleteSupplier={handleDeleteSupplier}
+        getProductCount={getProductCount}
+        supplierToId={supplierToId}
+      />
     </div>
   );
 };
